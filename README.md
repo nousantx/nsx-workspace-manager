@@ -2,7 +2,9 @@
 
 ## Installation
 
-```npm i -g @nousantx/nwm```
+```sh
+npm i -g @nousantx/nwm
+```
 
 ### Usage
 
