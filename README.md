@@ -6,7 +6,22 @@
 npm i -g @nousantx/nwm
 ```
 
-### Usage
+## Configuration
+
+Create a `workspaces.json` file inside your root directory and use this example :
+
+```json
+{
+  "packageManager": "yarn",
+  "workspacesDirs": ["packages/a", "apps/*"]
+}
+```
+
+- `packageManager`: `npm | yarn | pnpm`
+
+- `workspacesDirs`: `string[]`
+
+## Usage
 
 1. List all scripts
 
