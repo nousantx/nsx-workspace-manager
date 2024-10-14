@@ -1,12 +1,12 @@
-import path from 'node:path'
-import fs from 'node:fs'
+// interactive.ts
 import readline from 'node:readline'
 import { colors } from './color'
 import { searchScripts, displaySearchResults } from './search'
-import { listScripts } from './script'
-import { runScript } from './runner'
+import { listScripts, runScript } from './script'
+import { manageDependencies } from './deps'
+import { versionWorkspace } from './versioning'
 
-export function interactiveMode(): void {
+export async function interactiveMode(): Promise<void> {
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
@@ -14,52 +14,77 @@ export function interactiveMode(): void {
 
   console.log(`${colors.bright}Interactive Mode${colors.reset}`)
   console.log(
-    "Type 'exit' to quit, 'list' to show all scripts, or 'search <term>' to search scripts."
+    "Type 'exit' to quit, 'list' to show all scripts, 'search <term>' to search scripts, 'run <workspace> <script>' to run a script, 'add <workspace> [-D] <...packages>' to add dependencies, 'remove <workspace> <...packages>' to remove dependencies, or 'version <workspace>' to update version."
   )
 
-  rl.prompt()
-  rl.on('line', (input) => {
-    const [command, ...args] = input.trim().split(' ')
+  const promptUser = () => {
+    rl.question('> ', async (input) => {
+      const [command, ...args] = input.trim().split(' ')
 
-    switch (command.toLowerCase()) {
-      case 'exit':
-        rl.close()
-        break
-
-      case 'list':
-        listScripts()
-        break
-
-      case 'search':
-        if (args.length > 0) {
-          const results = searchScripts(args.join(' '))
-
-          displaySearchResults(results)
-        } else {
-          console.log(`${colors.yellow}Please provide a search term.${colors.reset}`)
+      try {
+        switch (command.toLowerCase()) {
+          case 'exit':
+            rl.close()
+            return
+          case 'list':
+            listScripts()
+            break
+          case 'search':
+            if (args.length > 0) {
+              const results = searchScripts(args.join(' '))
+              displaySearchResults(results)
+            } else {
+              console.log(`${colors.yellow}Please provide a search term.${colors.reset}`)
+            }
+            break
+          case 'run':
+            if (args.length >= 2) {
+              const [workspace, script] = args
+              await runScript(workspace, script)
+            } else {
+              console.log(
+                `${colors.yellow}Please provide both workspace and script name.${colors.reset}`
+              )
+            }
+            break
+          case 'add':
+          case 'remove':
+            if (args.length >= 2) {
+              const [workspace, ...packages] = args
+              await manageDependencies(command === 'add' ? 'add' : 'remove', workspace, packages)
+            } else {
+              console.log(
+                `${colors.yellow}Please provide workspace and at least one package name.${colors.reset}`
+              )
+            }
+            break
+          case 'version':
+            if (args.length === 1) {
+              const [workspace] = args
+              await versionWorkspace(workspace, rl)
+            } else {
+              console.log(`${colors.yellow}Please provide a workspace name.${colors.reset}`)
+            }
+            break
+          default:
+            console.log(
+              `${colors.yellow}Unknown command. Try 'list', 'search', 'run', 'add', 'remove', 'version', or 'exit'.${colors.reset}`
+            )
         }
-        break
+      } catch (error) {
+        console.error(`${colors.red}An error occurred:${colors.reset}`, error)
+      }
 
-      case 'run':
-        if (args.length >= 2) {
-          const [workspace, script] = args
-          runScript(workspace, script)
-        } else {
-          console.log(
-            `${colors.yellow}Please provide both workspace and script name.${colors.reset}`
-          )
-        }
-        break
+      promptUser() // Prompt for the next command
+    })
+  }
 
-      default:
-        console.log(
-          `${colors.yellow}Unknown command. Try 'list', 'search', 'run', or 'exit'.${colors.reset}`
-        )
-    }
+  promptUser() // Start the prompt loop
 
-    rl.prompt()
-  }).on('close', () => {
-    console.log(`${colors.bright}Goodbye!${colors.reset}`)
-    process.exit(0)
+  return new Promise((resolve) => {
+    rl.on('close', () => {
+      console.log(`${colors.bright}Goodbye!${colors.reset}`)
+      resolve()
+    })
   })
 }

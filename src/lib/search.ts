@@ -1,5 +1,3 @@
-import path from 'node:path'
-import fs from 'node:fs'
 import { colors } from './color'
 import { getScripts } from './script'
 import { getPackages } from './package'

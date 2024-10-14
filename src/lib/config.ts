@@ -8,13 +8,11 @@ interface Config {
   workspacesDirs: string[]
 }
 
-// default config
 export const defaultConfig: Config = {
   packageManager: 'npm',
   workspacesDirs: ['packages/*']
 }
 
-// Load config
 export function loadConfig(): Config {
   const rootDir = findRootDir(defaultConfig.workspacesDirs)
   const configPath = path.join(rootDir, 'workspace.json')

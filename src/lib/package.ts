@@ -9,30 +9,25 @@ interface Package {
   path: string
 }
 
-export const packageJson = JSON.parse(
-  fs.readFileSync(path.join(findRootDir(config.workspacesDirs), 'package.json'), 'utf-8')
-)
+const readPackageJson = (dir: string): any => {
+  const packageJsonPath = path.join(dir, 'package.json')
+  return fs.existsSync(packageJsonPath)
+    ? JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
+    : null
+}
+
+export const packageJson = readPackageJson(findRootDir(config.workspacesDirs))
 
 export function getPackages(): Package[] {
   const rootDir = findRootDir(config.workspacesDirs)
-  let allPackages: Package[] = []
 
-  config.workspacesDirs.forEach((workspaceDir) => {
-    const matchedDirs = resolveWorkspaces(workspaceDir, rootDir)
-
-    matchedDirs.forEach((dir) => {
-      if (fs.existsSync(dir) && fs.lstatSync(dir).isDirectory()) {
-        const packageJsonPath = path.join(dir, 'package.json')
-        if (fs.existsSync(packageJsonPath)) {
-          const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf-8'))
-          allPackages.push({
-            name: packageJson.name || path.basename(dir),
-            path: dir
-          })
-        }
-      }
-    })
+  return config.workspacesDirs.flatMap((workspaceDir) => {
+    return resolveWorkspaces(workspaceDir, rootDir)
+      .filter((dir) => fs.existsSync(dir) && fs.lstatSync(dir).isDirectory())
+      .map((dir) => {
+        const pkg = readPackageJson(dir)
+        return pkg ? { name: pkg.name || path.basename(dir), path: dir } : null
+      })
+      .filter(Boolean) // Removes null entries
   })
-
-  return allPackages
 }
