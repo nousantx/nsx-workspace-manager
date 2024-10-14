@@ -2,6 +2,7 @@
 
 ## Installation
 
+<<<<<<< HEAD
 `npm i -g @nousantx/nwm`
 
 ### Usage
@@ -21,6 +22,29 @@ Usage:
   nwm help # Show this message
 ```
 
+=======
+```sh
+npm i -g @nousantx/nwm
+```
+
+## Configuration
+
+Create a `workspaces.json` file inside your root directory and use this example :
+
+```json
+{
+  "packageManager": "yarn",
+  "workspacesDirs": ["packages/a", "apps/*"]
+}
+```
+
+- `packageManager`: `npm | yarn | pnpm`
+
+- `workspacesDirs`: `string[]`
+
+## Usage
+
+>>>>>>> 8493a6e86aaccaa1575eec9b850ab2e379fa7ed4
 1. List all scripts
 
 ```sh
@@ -51,6 +75,7 @@ Example :
 nwm run core build
 ```
 
+<<<<<<< HEAD
 4. Add/Remove dependencies
 
 Adding dependencies:
@@ -71,6 +96,8 @@ nwm remove package-a tenoxui
 nwm version package-a
 ```
 
+=======
+>>>>>>> 8493a6e86aaccaa1575eec9b850ab2e379fa7ed4
 4. Interactive mode
 
 ```sh
