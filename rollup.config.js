@@ -5,22 +5,26 @@ import terser from '@rollup/plugin-terser'
 
 const name = 'someutils'
 
+const prod = [
+  {
+    file: 'dist/index.cjs',
+    format: 'cjs'
+  },
+  {
+    file: 'dist/index.min.cjs',
+    format: 'cjs',
+    plugins: [terser()]
+  },
+  {
+    file: 'dist/index.js',
+    format: 'esm'
+  }
+]
+
 const config = {
   input: 'src/index.ts',
   output: [
-    {
-      file: 'dist/index.cjs',
-      format: 'cjs'
-    },
-    {
-      file: 'dist/index.min.cjs',
-      format: 'cjs',
-      plugins: [terser()]
-    },
-    {
-      file: 'dist/index.js',
-      format: 'esm'
-    },
+    ...prod,
     {
       file: 'dist/index.min.js',
       format: 'esm',
